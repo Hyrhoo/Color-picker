@@ -1,5 +1,5 @@
-# Color-selector
+# Color-picker
 
 > Utilise la bibliothèque `pygame`.
 
-le programe principale est `color_picker.py`
+Le programe principale est `color_picker.py`
