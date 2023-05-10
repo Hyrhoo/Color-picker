@@ -3,18 +3,27 @@ import pygame
 class RGB_Slider:
     def __init__(
             self,
-            wigth: int,
+            width: int,
             height: int,
-            angle: int = 0,
-            border_color: tuple[int, int, int] = (0, 0, 0)
+            center: tuple[int, int],
+            angle: int = 0
         ) -> None:
-        self.surface = pygame.Surface((1530, 1))
+        self.surface = pygame.Surface((1531, 1))
         self.__color_surface()
-        self.surface = pygame.transform.scale(self.surface, (wigth, height))
+        self.surface = pygame.transform.scale(self.surface, (width, height))
         self.surface = pygame.transform.rotate(self.surface, angle)
-        pygame.draw.rect(self.surface, border_color, (0, 0, wigth, height), 1)
-    
-    def creat_color(self, step):
+        self.rect = self.surface.get_rect(center=center)
+
+        self.select = False
+        self.color_change = True
+
+        cursor_height = max(3, height + height // 5)
+        cursor_width = max(3, cursor_height // 5)
+        self.cursor_surface = pygame.Surface((cursor_width, cursor_height)).convert_alpha()
+        self.cursor_rect = self.cursor_surface.get_rect()
+        self.move_cursor(self.rect.left)
+
+    def create_color(self, step):
         color = [255, 0, 0]
         if step:
             value = min(255, step)
@@ -40,13 +49,43 @@ class RGB_Slider:
             value = min(255, step)
             color[2] -= value
             step -= value
+        if step:
+            raise ValueError(f"the given value is too big {step}")
         return tuple(color)
 
     def __color_surface(self):
-        for x in range(1530):
-            color = self.creat_color(x)
+        for x in range(1531):
+            color = self.create_color(x)
             self.surface.set_at((x, 0), color)
-    
-    def draw(self, surface, center):
-        rect = self.surface.get_rect(center=center)
-        surface.blit(self.surface, rect)
+
+    def draw(self, surface):
+        surface.blit(self.surface, self.rect)
+        surface.blit(self.cursor_surface, self.cursor_rect)
+
+    def move_cursor(self, new_pos):
+        self.color_change = True
+        self.cursor = new_pos-self.rect.left
+        self.cursor = min(max(self.cursor, 0), self.rect.width-1)
+        self.cursor_color = self.surface.get_at((self.cursor, 0))
+        self.cursor_rect.center = (self.rect.left + self.cursor, self.rect.top + self.rect.height/2)
+
+        self.cursor_surface.fill((0, 0, 0, 0))
+        rect_coordon = (0, 0, self.cursor_rect.width, self.cursor_rect.height)
+        pygame.draw.rect(self.cursor_surface, self.cursor_color, rect_coordon, border_radius=9999)
+        pygame.draw.rect(self.cursor_surface, "#000000", rect_coordon, 1, 9999)
+
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            is_colliding = self.rect.collidepoint(*event.pos) or self.cursor_rect.collidepoint(*event.pos)
+            if is_colliding:
+                self.select = True
+                self.move_cursor(event.pos[0])
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.select = False
+        if event.type == pygame.MOUSEMOTION:
+            if self.select:
+                self.move_cursor(event.pos[0])
+
+    def get_color(self):
+        self.color_change = False
+        return self.cursor_color
