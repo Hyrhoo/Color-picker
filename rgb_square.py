@@ -6,12 +6,12 @@ class RGB_Square:
             self,
             width: int,
             height: int,
-            center: tuple[int, int],
             base_color: tuple[int, int, int],
-            background_color: tuple[int, int, int, int] | str = "#FFFFFF42"
+            background_color: tuple[int, int, int, int] | str = "#00000000",
+            **position: tuple[int, int]
         ) -> None:
         self.draw_surface = pygame.Surface((width, height)).convert_alpha()
-        self.draw_rect = self.draw_surface.get_rect(center=center)
+        self.draw_rect = self.draw_surface.get_rect(**position)
 
         self.base_color = base_color
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     screen_size = (1800, 800)
     screen = pygame.display.set_mode(screen_size)
     clock = pygame.time.Clock()
-    rgb_square = RGB_Square(500, 500, tuple(i//2 for i in screen_size), (255, 0, 0))
+    rgb_square = RGB_Square(500, 500, (255, 0, 0), "#FFFFFF42", center=tuple(i//2 for i in screen_size))
 
     while True:
         screen.fill("#424242")

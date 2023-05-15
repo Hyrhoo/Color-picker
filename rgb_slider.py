@@ -5,12 +5,12 @@ class RGB_Slider:
             self,
             width: int,
             height: int,
-            center: tuple[int, int],
             cursor_proportion: float = 0.25,
-            background_color: tuple[int, int, int, int] | str = "#FFFFFF42"
+            background_color: tuple[int, int, int, int] | str = "#00000000",
+            **position: tuple[int, int]
         ) -> None:
         self.draw_surface = pygame.Surface((width, height)).convert_alpha()
-        self.draw_rect = self.draw_surface.get_rect(center=center)
+        self.draw_rect = self.draw_surface.get_rect(**position)
 
         cursor_height = height
         cursor_width = cursor_height * cursor_proportion
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     screen_size = (1800, 800)
     screen = pygame.display.set_mode(screen_size)
     clock = pygame.time.Clock()
-    rgb_slider = RGB_Slider(1700, 150, tuple(i//2 for i in screen_size))
+    rgb_slider = RGB_Slider(1700, 150, background_color="#FFFFFF42", center=tuple(i//2 for i in screen_size))
 
     while True:
         screen.fill("#424242")
