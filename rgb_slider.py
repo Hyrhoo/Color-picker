@@ -6,7 +6,8 @@ class RGB_Slider:
             width: int,
             height: int,
             center: tuple[int, int],
-            cursor_proportion: float = 0.25
+            cursor_proportion: float = 0.25,
+            background_color: tuple[int, int, int, int] | str = "#FFFFFF42"
         ) -> None:
         self.draw_surface = pygame.Surface((width, height)).convert_alpha()
         self.draw_rect = self.draw_surface.get_rect(center=center)
@@ -30,6 +31,8 @@ class RGB_Slider:
         self.cursor_rect = self.cursor_surface.get_rect()
         self.cursor_border_thickness = int(min(max(cursor_height//10, 1), max(cursor_width//10, 1)))
         self.move_cursor(self.surface_rect.x)
+
+        self.background_color = background_color
 
 
     def create_color(self, step):
@@ -68,7 +71,7 @@ class RGB_Slider:
             self.surface.set_at((x, 0), color)
 
     def draw(self, surface):
-        self.draw_surface.fill("#00000000")
+        self.draw_surface.fill(self.background_color)
         self.draw_surface.blit(self.surface, self.surface_rect)
         self.draw_surface.blit(self.cursor_surface, self.cursor_rect)
         surface.blit(self.draw_surface, self.draw_rect)
