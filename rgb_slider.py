@@ -13,7 +13,7 @@ class RGB_Slider:
         self.draw_rect = self.draw_surface.get_rect(**position)
 
         cursor_height = height
-        cursor_width = cursor_height * cursor_proportion
+        cursor_width = min(cursor_height * cursor_proportion, width-2)
         surf_size = (width - cursor_width, height * 0.85)
 
         self.surface = pygame.Surface((1531, 1))
@@ -78,8 +78,8 @@ class RGB_Slider:
 
     def move_cursor(self, new_pos):
         self.color_change = True
-        self.cursor = new_pos - self.surface_rect.x
-        self.cursor = min(max(self.cursor, 0), self.surface_rect.width - 1)
+        pos = new_pos - self.surface_rect.x
+        self.cursor = min(max(pos, 0), self.surface_rect.width - 1)
         self.cursor_color = self.surface.get_at((self.cursor, 0))
         self.cursor_rect.topleft = (1 + self.cursor + self.surface_rect.x - self.cursor_rect.width/2, 0)
 
@@ -88,9 +88,9 @@ class RGB_Slider:
         pygame.draw.rect(self.cursor_surface, self.cursor_color, rect_coordon, border_radius=9999)
         pygame.draw.rect(self.cursor_surface, "#FFFFFF", rect_coordon, self.cursor_border_thickness, 9999)
 
-    def handle_event(self, event: pygame.event.Event, sub_surface_pos):
+    def handle_event(self, event: pygame.event.Event, primary_surface_pos):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = (event.pos[0] - sub_surface_pos[0] - self.draw_rect.x, event.pos[1] - sub_surface_pos[1] - self.draw_rect.y)
+            pos = (event.pos[0] - primary_surface_pos[0] - self.draw_rect.x, event.pos[1] - primary_surface_pos[1] - self.draw_rect.y)
             is_colliding = self.surface_rect.collidepoint(pos) or self.cursor_rect.collidepoint(pos)
             if is_colliding:
                 self.select = True
@@ -99,7 +99,7 @@ class RGB_Slider:
             self.select = False
         if event.type == pygame.MOUSEMOTION:
             if self.select:
-                pos = event.pos[0] - sub_surface_pos[0] - self.draw_rect.x
+                pos = event.pos[0] - primary_surface_pos[0] - self.draw_rect.x
                 self.move_cursor(pos)
 
     def get_color(self):
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     screen_size = (1800, 800)
     screen = pygame.display.set_mode(screen_size)
     clock = pygame.time.Clock()
-    rgb_slider = RGB_Slider(1700, 150, background_color="#FFFFFF42", center=tuple(i//2 for i in screen_size))
+    rgb_slider = RGB_Slider(100, 50, 1.0, background_color="#FFFFFF42", center=tuple(i//2 for i in screen_size))
 
     while True:
         screen.fill("#424242")

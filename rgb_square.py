@@ -68,9 +68,9 @@ class RGB_Square:
         pygame.draw.rect(self.cursor_surface, self.cursor_color, rect_coordon, border_radius=9999)
         pygame.draw.rect(self.cursor_surface, "#FFFFFF", rect_coordon, self.cursor_border_thickness, 9999)
     
-    def handle_event(self, event: pygame.event.Event, sub_surface_pos):
+    def handle_event(self, event: pygame.event.Event, primary_surface_pos):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = (event.pos[0] - sub_surface_pos[0] - self.draw_rect.x, event.pos[1] - sub_surface_pos[1] - self.draw_rect.y)
+            pos = (event.pos[0] - primary_surface_pos[0] - self.draw_rect.x, event.pos[1] - primary_surface_pos[1] - self.draw_rect.y)
             is_colliding = self.surface_rect.collidepoint(pos) or self.cursor_rect.collidepoint(pos)
             if is_colliding:
                 self.select = True
@@ -79,7 +79,7 @@ class RGB_Square:
             self.select = False
         if event.type == pygame.MOUSEMOTION:
             if self.select:
-                pos = (event.pos[0] - sub_surface_pos[0] - self.draw_rect.x, event.pos[1] - sub_surface_pos[1] - self.draw_rect.y)
+                pos = (event.pos[0] - primary_surface_pos[0] - self.draw_rect.x, event.pos[1] - primary_surface_pos[1] - self.draw_rect.y)
                 self.move_cursor(*pos)
 
     def get_color(self):
