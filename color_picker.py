@@ -60,7 +60,7 @@ if __name__ == "__main__":
     screen_size = (1800, 800)
     screen = pygame.display.set_mode(screen_size)
     clock = pygame.time.Clock()
-    color_picker = Color_Picker(800, 800, "#FFFFFF42", center=tuple(i//2 for i in screen_size))
+    color_picker = Color_Picker(1000, 400, "#FFFFFF42", center=tuple(i//2 for i in screen_size))
 
     while True:
         screen.fill("#424242")
