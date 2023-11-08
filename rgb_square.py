@@ -1,5 +1,5 @@
 import pygame
-
+from fonctions import rgb_to_hsv, hsv_to_rgb
 class RGB_Square:
     
     def __init__(
@@ -13,11 +13,13 @@ class RGB_Square:
         self.draw_surface = pygame.Surface((width, height)).convert_alpha()
         self.draw_rect = self.draw_surface.get_rect(**position)
 
-        self.base_color = base_color
+        self.hue = rgb_to_hsv(*base_color)[0]
 
         cursor_width = round(width / 10)
         cursor_height = round(height / 10)
         surf_size = (width - cursor_width, height - cursor_height)
+        self.x_multi = 1 / surf_size[0]
+        self.y_multi = 1 / surf_size[1]
 
         self.surface = pygame.Surface((256, 256))
         self.__color_surface()
@@ -36,17 +38,14 @@ class RGB_Square:
         self.move_cursor(self.surface_rect.right, self.surface_rect.top)
 
         self.background_color = background_color
-
-    def creat_color(self, x, y):
-        x = 255-x
-        col = lighten_color(self.base_color, x)
-        final_color = darken_color(col, y)
-        return final_color
     
     def __color_surface(self):
+        multi = 1/255
         for x in range(256):
+            x_mult = x*multi
             for y in range(256):
-                color = self.creat_color(x, y)
+                y2 = 255 - y
+                color = hsv_to_rgb(self.hue, x_mult, y2*multi)
                 self.surface.set_at((x, y), color)
     
     def draw(self, surface):
@@ -60,7 +59,10 @@ class RGB_Square:
         x = x - self.surface_rect.x
         y = y - self.surface_rect.y
         self.cursor = (min(max(x, 0), self.surface_rect.width - 1), min(max(y, 0), self.surface_rect.height - 1))
-        self.cursor_color = self.surface.get_at(self.cursor)
+        
+        cursor_saturation = self.cursor[0]*self.x_multi
+        cursor_value = (self.surface_rect.height - self.cursor[1])*self.y_multi
+        self.cursor_color = hsv_to_rgb(self.hue, cursor_saturation, cursor_value)
         self.cursor_rect.center = (1 + self.cursor[0] + self.x_offset, 1 + self.cursor[1] + self.y_offset)
 
         self.cursor_surface.fill((0, 0, 0, 0))
@@ -87,7 +89,7 @@ class RGB_Square:
         return self.cursor_color
     
     def change_base_color(self, new_color):
-        self.base_color = new_color
+        self.hue = rgb_to_hsv(*new_color)[0]
 
         surf_size = self.surface_rect.size
 
@@ -95,26 +97,18 @@ class RGB_Square:
         self.__color_surface()
         self.surface = pygame.transform.scale(self.surface, surf_size)
 
-        self.surface_rect = self.surface.get_rect(topleft=(self.x_offset, self.y_offset))
+        # self.surface_rect = self.surface.get_rect(topleft=(self.x_offset, self.y_offset))
         self.color_change = True
         cursor_pos = (self.cursor[0] + self.x_offset, self.cursor[1] + self.y_offset)
         self.move_cursor(*cursor_pos)
 
+    def set_value(self, value):
+        cursor_y = self.surface_rect.height - value/self.y_multi
+        self.move_cursor(self.cursor[0], self.surface_rect.y + cursor_y)
 
-
-def lighten_color(rgb_color, additive_value):
-    return_color = []
-    return_color.append(round(((255 - rgb_color[0])/255) * additive_value) + rgb_color[0])
-    return_color.append(round(((255 - rgb_color[1])/255) * additive_value) + rgb_color[1])
-    return_color.append(round(((255 - rgb_color[2])/255) * additive_value) + rgb_color[2])
-    return tuple(return_color)
-
-def darken_color(rgb_color, subtractive_value):
-    return_color = []
-    return_color.append(round((rgb_color[0]/255) * (255-subtractive_value)))
-    return_color.append(round((rgb_color[1]/255) * (255-subtractive_value)))
-    return_color.append(round((rgb_color[2]/255) * (255-subtractive_value)))
-    return tuple(return_color)
+    def set_saturation(self, saturation):
+        cursor_x = saturation/self.x_multi
+        self.move_cursor(self.surface_rect.x + cursor_x, self.cursor[1])
 
 
 if __name__ == "__main__":

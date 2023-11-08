@@ -10,6 +10,7 @@ class Color_Picker:
             width: int,
             height: int,
             background_color: tuple[int, int, int, int] | str  = "#00000000",
+            composants_background_colot: tuple[int, int, int, int] | str = "#00000000",
             **position: tuple[int, int]
         ) -> None:
         self.image = pygame.Surface((width, height)).convert_alpha()
@@ -19,11 +20,10 @@ class Color_Picker:
         slider_height = height - square_size
         color_viewer_size = (width-square_size, height-slider_height)
 
-        self.rgb_slider = RGB_Slider(width, slider_height, 1.0, "#FFFFFF42", bottomleft=(0, height))
-        self.rgb_square = RGB_Square(square_size, square_size, self.rgb_slider.get_color(), "#FFFFFF42", topright=(width, 0))
+        self.rgb_slider = RGB_Slider(width, slider_height, 1.0, composants_background_colot, bottomleft=(0, height))
+        self.rgb_square = RGB_Square(square_size, square_size, self.rgb_slider.get_color(), composants_background_colot, topright=(width, 0))
         self.color_viewer = Color_Viewer(*color_viewer_size, self.rgb_square.get_color(), topleft=(0, 0))
         
-        print(self.rgb_slider.get_color(), self.rgb_square.get_color())
         self.selected_color = self.rgb_square.get_color()
         self.color_change = True
 

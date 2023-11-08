@@ -1,4 +1,5 @@
 import pygame
+from fonctions import rgb_to_hsv, hsv_to_rgb
 
 class RGB_Slider:
     def __init__(
@@ -27,6 +28,7 @@ class RGB_Slider:
         self.select = False
         self.color_change = True
 
+        self.multi = 360/(self.surface_rect.width - 1)
         self.cursor_surface = pygame.Surface((cursor_width, cursor_height)).convert_alpha()
         self.cursor_rect = self.cursor_surface.get_rect()
         self.cursor_border_thickness = int(min(max(cursor_height//10, 1), max(cursor_width//10, 1)))
@@ -34,40 +36,10 @@ class RGB_Slider:
 
         self.background_color = background_color
 
-
-    def create_color(self, step):
-        color = [255, 0, 0]
-        if step:
-            value = min(255, step)
-            color[1] += value
-            step -= value
-        if step:
-            value = min(255, step)
-            color[0] -= value
-            step -= value
-        if step:
-            value = min(255, step)
-            color[2] += value
-            step -= value
-        if step:
-            value = min(255, step)
-            color[1] -= value
-            step -= value
-        if step:
-            value = min(255, step)
-            color[0] += value
-            step -= value
-        if step:
-            value = min(255, step)
-            color[2] -= value
-            step -= value
-        if step:
-            raise ValueError(f"the given value is too big {step}")
-        return tuple(color)
-
     def __color_surface(self):
+        multi = 360/1530
         for x in range(1531):
-            color = self.create_color(x)
+            color = hsv_to_rgb(multi*x, 1.0, 1.0)
             self.surface.set_at((x, 0), color)
 
     def draw(self, surface):
@@ -80,7 +52,9 @@ class RGB_Slider:
         self.color_change = True
         pos = new_pos - self.surface_rect.x
         self.cursor = min(max(pos, 0), self.surface_rect.width - 1)
-        self.cursor_color = self.surface.get_at((self.cursor, 0))
+        
+        cursor_hue = self.multi * self.cursor
+        self.cursor_color = hsv_to_rgb(cursor_hue, 1.0, 1.0)
         self.cursor_rect.topleft = (1 + self.cursor + self.surface_rect.x - self.cursor_rect.width/2, 0)
 
         self.cursor_surface.fill((0, 0, 0, 0))
@@ -105,13 +79,17 @@ class RGB_Slider:
     def get_color(self):
         self.color_change = False
         return self.cursor_color
+    
+    def set_hue(self, hue):
+        cursor = hue/self.multi
+        self.move_cursor(cursor+self.surface_rect.x)
 
 if __name__ == "__main__":
     pygame.init()
     screen_size = (1800, 800)
     screen = pygame.display.set_mode(screen_size)
     clock = pygame.time.Clock()
-    rgb_slider = RGB_Slider(100, 50, 1.0, background_color="#FFFFFF42", center=tuple(i//2 for i in screen_size))
+    rgb_slider = RGB_Slider(1700, 50, 1.0, background_color="#FFFFFF42", center=tuple(i//2 for i in screen_size))
 
     while True:
         screen.fill("#424242")
